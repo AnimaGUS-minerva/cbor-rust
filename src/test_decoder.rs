@@ -308,22 +308,21 @@ fn test_maps() {
     expected.insert(CborType::Integer(3), CborType::Integer(4));
     test_decoder(bytes, CborType::Map(expected));
 
-    // TODO: strings aren't properly supported as keys yet.
     // {"a": 1, "b": [2, 3]}
-    // let bytes: Vec<u8> = vec![0xa2, 0x61, 0x61, 0x01, 0x61, 0x62, 0x82, 0x02, 0x03];
-    // let expected =
-    //     CborType::Map(vec![
-    //         CborMap{key: CborType::Integer(1), value: CborType::Integer(2)},
-    //         CborMap{key: CborType::Integer(3), value: CborType::Integer(4)}]);
-    // test_decoder(bytes, expected);
+    let bytes: Vec<u8> = vec![0xa2, 0x61, 0x61, 0x01, 0x61, 0x62, 0x82, 0x02, 0x03];
+    let mut expected: BTreeMap<CborType, CborType> = BTreeMap::new();
+    expected.insert(CborType::String("a".to_string()), CborType::Integer(1));
+    expected.insert(CborType::String("b".to_string()), CborType::Array(vec![CborType::Integer(2), CborType::Integer(3)]));
+    test_decoder(bytes, CborType::Map(expected));
 
-    // let bytes: Vec<u8> = vec![0x82, 0x61, 0x61, 0xa1, 0x61, 0x62, 0x61, 0x63];
-    // test_decoder(bytes, "[a, {b: c}]");
-
-    // let bytes: Vec<u8> = vec![0xa5, 0x61, 0x61, 0x61, 0x41, 0x61, 0x62, 0x61,
-    //                           0x42, 0x61, 0x63, 0x61, 0x43, 0x61, 0x64, 0x61,
+    // TODO: another string test with more complex usage
+    //let bytes: Vec<u8> = vec![0x82, 0x61, 0x61, 0xa1, 0x61, 0x62, 0x61, 0x63];
+    //test_decoder(bytes, "[a, {b: c}]");
+    //
+    //let bytes: Vec<u8> = vec![0xa5, 0x61, 0x61, 0x61, 0x41, 0x61, 0x62, 0x61,
+    //                          0x42, 0x61, 0x63, 0x61, 0x43, 0x61, 0x64, 0x61,
     //                           0x44, 0x61, 0x65, 0x61, 0x45];
-    // test_decoder(bytes, "{a: A, b: B, c: C, d: D, e: E}");
+    //test_decoder(bytes, "{a: A, b: B, c: C, d: D, e: E}");
 }
 
 #[test]
