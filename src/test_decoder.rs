@@ -284,6 +284,13 @@ fn test_byte_strings() {
 fn test_string_objects() {
     let string = vec![0x65, 0x68, 0x65, 0x6c, 0x6c, 0x6f];
     test_string(string, "hello");
+
+    /* some stupid UTF-8 */
+    let string2 = vec![0x6f,
+                       0x6f, 0x6c, 0x6c, 0xc7, 0x9d, 0xc9,
+                       0xa5, 0x0a, 0xc9, 0xa5, 0xc7, 0x9d,
+                       0x6c, 0x6c, 0x6f];
+    test_string(string2, "ollǝɥ\nɥǝllo");
 }
 
 
