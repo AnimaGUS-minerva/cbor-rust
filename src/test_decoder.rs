@@ -23,6 +23,14 @@ fn test_integer(bytes: Vec<u8>, expected: u64) {
     }
 }
 
+fn test_string(bytes: Vec<u8>, expected: &str) {
+    let decoded = decode(&bytes).unwrap();
+    match decoded {
+        CborType::String(val) => assert_eq!(val, expected),
+        _ => assert_eq!(1, 0),
+    }
+}
+
 fn test_integer_all(bytes: Vec<u8>, expected_value: u64) {
     let expected = CborType::Integer(expected_value);
     test_decoder(bytes.clone(), expected);
@@ -273,6 +281,13 @@ fn test_byte_strings() {
 }
 
 #[test]
+fn test_string_objects() {
+    let string = vec![0x65, 0x68, 0x65, 0x6c, 0x6c, 0x6f];
+    test_string(string, "hello");
+}
+
+
+#[test]
 fn test_maps() {
     // {}
     let bytes: Vec<u8> = vec![0xa0];
@@ -383,13 +398,6 @@ fn test_too_large_input() {
     let mut bytes = vec![0x5A, 0x08, 0x00, 0x00, 0x01];
     bytes.extend_from_slice(&array);
     test_decoder_error(bytes, CborError::InputTooLarge);
-}
-
-// We currently don't support CBOR strings (issue #39).
-#[test]
-fn test_invalid_input() {
-    let bytes = vec![0x60];
-    test_decoder_error(bytes, CborError::UnsupportedType);
 }
 
 #[test]

@@ -90,6 +90,21 @@ impl<'a> DecoderCursor<'a> {
         Ok(CborType::Bytes(byte_string))
     }
 
+    /// Read a text string and return it.
+    fn read_text_string(&mut self) -> Result<CborType, CborError> {
+        let length = self.read_int()?;
+        if length > MAX_ARRAY_SIZE as u64 {
+            return Err(CborError::InputTooLarge);
+        }
+        let some_bytes = self.read_bytes(length as usize)?;
+        let maybe_string = String::from_utf8(some_bytes);
+        let text_string = match maybe_string {
+            Err(_e) => return Err(CborError::MalformedInput),
+            Ok(msg) => msg
+        };
+        Ok(CborType::String(text_string))
+    }
+
     /// Read a map.
     fn read_map(&mut self) -> Result<CborType, CborError> {
         let num_items = self.read_int()?;
@@ -137,6 +152,7 @@ impl<'a> DecoderCursor<'a> {
             }
             1 => self.read_negative_int(),
             2 => self.read_byte_string(),
+            3 => self.read_text_string(),
             4 => self.read_array(),
             5 => self.read_map(),
             6 => {
@@ -145,7 +161,10 @@ impl<'a> DecoderCursor<'a> {
                 Ok(CborType::Tag(tag, Box::new(item)))
             }
             7 => self.read_null(),
-            _ => Err(CborError::UnsupportedType),
+            _ => {
+                //println!("unsupported: {:?}", major_type);
+                Err(CborError::UnsupportedType)
+            },
         };
         self.depth -= 1;
         result
